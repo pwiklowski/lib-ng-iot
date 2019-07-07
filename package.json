@@ -1,0 +1,7 @@
+{
+  "name": "@wiklosoft/ng-iot",
+  "version": "0.0.1",
+  "dependencies": {
+    "ws": "^7.0.1"
+  }
+}
