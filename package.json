@@ -1,7 +1,12 @@
 {
   "name": "@wiklosoft/ng-iot",
   "version": "0.0.1",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
   "dependencies": {
-    "ws": "^7.0.1"
+    "websocket": "^1.0.29"
   }
 }

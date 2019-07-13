@@ -39,3 +39,7 @@ export interface Var {
   access: Permission;
   value: any;
 }
+
+export interface MessageHandler {
+  (): void;
+}
