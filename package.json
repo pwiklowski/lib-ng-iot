@@ -4,9 +4,13 @@
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "webpack"
   },
   "dependencies": {
     "websocket": "^1.0.29"
+  },
+  "devDependencies": {
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.5.3"
   }
 }
