@@ -66,7 +66,7 @@ export class Controller {
   private handleResponse(msg: Response) {
     const callback = this.callbacks.get(msg.resId);
     if (callback) {
-      callback(msg);
+      callback(msg.res);
       this.callbacks.delete(msg.resId);
     }
   }
