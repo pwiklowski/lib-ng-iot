@@ -1,7 +1,7 @@
 export interface Request {
   reqId?: number;
   type: MessageType;
-  args: any;
+  args?: any;
 }
 
 export interface Response {
