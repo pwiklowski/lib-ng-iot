@@ -20,7 +20,8 @@ export enum MessageType {
   GetDevices,
   Notification,
   DeviceConnected,
-  DeviceDisconnected
+  DeviceDisconnected,
+  ValueUpdated
 }
 
 export interface DeviceConfig {
