@@ -24,8 +24,8 @@ export enum MessageType {
 }
 
 export interface DeviceConfig {
-  name: String;
-  id: String;
+  name: string;
+  id: string;
   vars: Vars;
 }
 
@@ -34,7 +34,7 @@ export interface Vars {
 }
 
 export interface Var {
-  name: String;
+  name: string;
   schema: any;
   access: Permission;
   value: any;
