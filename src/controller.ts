@@ -1,4 +1,4 @@
-import { w3cwebsocket } from "websocket";
+import { w3cwebsocket, client } from "websocket";
 
 import {
   MessageType,
@@ -10,16 +10,23 @@ import {
 } from "./interfaces";
 
 export class Controller {
-  ws: w3cwebsocket;
+  ws;
   callbacks: Map<number, Function>;
   messageHandler: MessageHandler = null;
 
   constructor() {
     this.callbacks = new Map();
-    this.ws = new w3cwebsocket("ws://127.0.0.1:8000/controller");
-    this.ws.onopen = this.onOpen;
-    this.ws.close = this.onClose;
-    this.ws.onmessage = this.onMessage;
+  }
+
+  connect(url: string, callback) {
+    if (window) {
+      this.ws = new w3cwebsocket(url);
+    } else {
+      this.ws = new client(url);
+    }
+    this.ws.close = this.onClose.bind(this);
+    this.ws.onmessage = this.onMessage.bind(this);
+    this.ws.onopen = callback;
   }
 
   private onOpen() {
