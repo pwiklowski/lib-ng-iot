@@ -14,37 +14,42 @@ export class Controller {
   callbacks: Map<number, Function>;
   messageHandler: MessageHandler = null;
   reqId = 0;
+  private onOpenCallback: Function;
+  private url: string;
 
   constructor() {
     this.callbacks = new Map();
   }
 
-  connect(url: string, callback) {
+  connect(url: string, callback: Function) {
     if (window) {
       this.ws = new w3cwebsocket(url);
     } else {
       this.ws = new client(url);
     }
-    this.ws.close = this.onClose.bind(this);
+    this.ws.onclose = this.onClose.bind(this);
     this.ws.onmessage = this.onMessage.bind(this);
     this.ws.onopen = callback;
+    this.onOpenCallback = callback;
+    this.url = url;
   }
 
-  private onOpen() {
-    const request: Request = {
-      type: MessageType.GetDevices,
-      reqId: 0,
-      args: {}
-    };
-
-    this.ws.send(JSON.stringify(request));
+  reconnect() {
+    if (window) {
+      this.ws = new w3cwebsocket(this.url);
+    } else {
+      this.ws = new client(this.url);
+    }
+    this.ws.onclose = this.onClose.bind(this);
+    this.ws.onmessage = this.onMessage.bind(this);
+    this.ws.onopen = this.onOpenCallback;
   }
 
   private onClose() {
     console.log("disconnected");
 
     setTimeout(() => {
-      this.ws.onopen = this.onOpen;
+      this.reconnect();
     }, 1000);
   }
 
