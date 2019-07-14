@@ -13,6 +13,7 @@ export class Controller {
   ws;
   callbacks: Map<number, Function>;
   messageHandler: MessageHandler = null;
+  reqId = 0;
 
   constructor() {
     this.callbacks = new Map();
@@ -71,7 +72,8 @@ export class Controller {
   }
 
   sendRequest(req: Request, callback?: Function) {
-    if (callback !== undefined && req.reqId) {
+    if (callback !== undefined) {
+      req.reqId = this.reqId++;
       this.callbacks.set(req.reqId, callback);
     }
     this.ws.send(JSON.stringify(req));
@@ -80,5 +82,12 @@ export class Controller {
   sendResponse(req: Request, res: Response) {
     res.resId = req.reqId;
     this.ws.send(JSON.stringify(res));
+  }
+
+  getDevices(callback) {
+    const request: Request = {
+      type: MessageType.GetDevices
+    };
+    this.sendRequest(request, callback);
   }
 }
