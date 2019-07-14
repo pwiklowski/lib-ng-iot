@@ -48,7 +48,7 @@ export class Controller {
   }
 
   onMessage(message) {
-    const msg = JSON.parse(message);
+    const msg = JSON.parse(message.data);
     if (msg.resId !== undefined) {
       this.handleResponse(msg);
     } else {
