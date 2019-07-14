@@ -56,7 +56,11 @@ export class Controller {
     }
   }
 
-  private handleRequest(msg: Request) {}
+  private handleRequest(msg: Request) {
+    if (this.messageHandler !== null) {
+      this.messageHandler(msg);
+    }
+  }
 
   private handleResponse(msg: Response) {
     const callback = this.callbacks.get(msg.resId);

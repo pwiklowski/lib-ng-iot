@@ -41,5 +41,5 @@ export interface Var {
 }
 
 export interface MessageHandler {
-  (): void;
+  (message: Request): void;
 }
