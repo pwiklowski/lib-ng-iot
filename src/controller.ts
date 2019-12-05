@@ -1,59 +1,54 @@
-import { w3cwebsocket, client } from "websocket";
+import WebSocket from "isomorphic-ws";
 
-import {
-  MessageType,
-  MessageHandler,
-  Permission,
-  Request,
-  Response,
-  DeviceConfig
-} from "./interfaces";
+import { MessageType, MessageHandler, Request, Response } from "./interfaces";
 
 export class Controller {
   ws;
   callbacks: Map<number, Function>;
-  messageHandler: MessageHandler = null;
   reqId = 0;
-  private onOpenCallback: Function;
   private url: string;
+
+  onOpen: Function;
+  onClose: Function;
+  onMessage: MessageHandler = null;
 
   constructor() {
     this.callbacks = new Map();
   }
 
   connect(url: string, callback: Function) {
-    if (window) {
-      this.ws = new w3cwebsocket(url);
-    } else {
-      this.ws = new client(url);
-    }
-    this.ws.onclose = this.onClose.bind(this);
-    this.ws.onmessage = this.onMessage.bind(this);
-    this.ws.onopen = callback;
-    this.onOpenCallback = callback;
+    this.ws = new WebSocket(url);
+
+    this.ws.onclose = this.onCloseHandler.bind(this);
+    this.ws.onmessage = this.onMessageHandler.bind(this);
+    this.ws.onopen = this.onOpenHandler.bind(this);
     this.url = url;
   }
 
   reconnect() {
-    if (window) {
-      this.ws = new w3cwebsocket(this.url);
-    } else {
-      this.ws = new client(this.url);
-    }
-    this.ws.onclose = this.onClose.bind(this);
-    this.ws.onmessage = this.onMessage.bind(this);
-    this.ws.onopen = this.onOpenCallback;
+    this.ws = new WebSocket(this.url);
+    this.ws.onclose = this.onCloseHandler.bind(this);
+    this.ws.onmessage = this.onMessageHandler.bind(this);
+    this.ws.onopen = this.onOpenHandler.bind(this);
   }
 
-  private onClose() {
-    console.log("disconnected");
+  private onOpenHandler() {
+    if (this.onOpen !== null) {
+      this.onOpen();
+    }
+  }
+
+  private onCloseHandler() {
+    if (this.onClose !== null) {
+      this.onClose();
+    }
 
     setTimeout(() => {
       this.reconnect();
     }, 1000);
   }
 
-  onMessage(message) {
+  private onMessageHandler(message) {
     const msg = JSON.parse(message.data);
     if (msg.resId !== undefined) {
       this.handleResponse(msg);
@@ -63,8 +58,8 @@ export class Controller {
   }
 
   private handleRequest(msg: Request) {
-    if (this.messageHandler !== null) {
-      this.messageHandler(msg);
+    if (this.onMessage !== null) {
+      this.onMessage(msg);
     }
   }
 
