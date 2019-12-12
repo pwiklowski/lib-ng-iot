@@ -97,10 +97,13 @@ export class Controller {
     this.sendRequest(request, callback);
   }
 
-  getDevice(): Promise<DeviceConfig> {
+  getDevice(deviceUuid: string): Promise<DeviceConfig> {
     return new Promise((resolve, reject) => {
       const request: Request = {
-        type: MessageType.GetDevice
+        type: MessageType.GetDevice,
+        args: {
+          deviceUuid
+        }
       };
       this.sendRequest(request, resolve);
     });
