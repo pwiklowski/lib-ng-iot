@@ -28,7 +28,7 @@ export enum MessageType {
 
 export interface DeviceConfig {
   name: string;
-  id: string;
+  deviceUuid: string;
   vars: Vars;
 }
 
