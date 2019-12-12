@@ -1,6 +1,12 @@
 import WebSocket from "isomorphic-ws";
 
-import { MessageType, MessageHandler, Request, Response } from "./interfaces";
+import {
+  MessageType,
+  MessageHandler,
+  Request,
+  Response,
+  DeviceConfig
+} from "./interfaces";
 
 export class Controller {
   ws;
@@ -89,5 +95,14 @@ export class Controller {
       type: MessageType.GetDevices
     };
     this.sendRequest(request, callback);
+  }
+
+  getDevice(): Promise<DeviceConfig> {
+    return new Promise((resolve, reject) => {
+      const request: Request = {
+        type: MessageType.GetDevice
+      };
+      this.sendRequest(request, resolve);
+    });
   }
 }
