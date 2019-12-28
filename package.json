@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "isomorphic-ws": "^4.0.1",
+    "rxjs": "^6.5.4",
     "webpack": "^4.41.2",
     "websocket": "^1.0.29",
     "ws": "^7.1.1"

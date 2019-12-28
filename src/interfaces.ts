@@ -1,3 +1,4 @@
+import { Subject } from "rxjs";
 export interface Request {
   reqId?: number;
   type: MessageType;
@@ -45,4 +46,16 @@ export interface Var {
 
 export interface MessageHandler {
   (message: Request): void;
+}
+
+export interface VariableObserver {
+  variableUuid: string;
+  deviceUuid: string;
+  observer: Subject<Object>;
+}
+
+export enum ConnectionState {
+  CONNECTED,
+  DISCONNECTED,
+  NOT_AUTHORIZED
 }
