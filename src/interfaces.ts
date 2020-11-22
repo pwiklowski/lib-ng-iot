@@ -12,7 +12,7 @@ export interface Response {
 export enum Permission {
   READ = "r",
   WRITE = "w",
-  READ_WRITE = "rw"
+  READ_WRITE = "rw",
 }
 
 export enum MessageType {
@@ -24,7 +24,7 @@ export enum MessageType {
   DeviceDisconnected,
   ValueUpdated,
   SetValue,
-  GetDevice
+  GetDevice,
 }
 
 export interface DeviceConfig {
@@ -57,5 +57,12 @@ export interface VariableObserver {
 export enum ConnectionState {
   CONNECTED,
   DISCONNECTED,
-  NOT_AUTHORIZED
+  NOT_AUTHORIZED,
+}
+
+export interface AuthData {
+  client_id: string;
+  secret: string;
+  access_token: string;
+  refresh_token: string;
 }
