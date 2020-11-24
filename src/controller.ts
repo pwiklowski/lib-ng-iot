@@ -1,15 +1,8 @@
 import WebSocket from "isomorphic-ws";
 
-import {
-  MessageType,
-  MessageHandler,
-  Request,
-  Response,
-  DeviceConfig,
-  ConnectionState,
-  VariableObserver
-} from "./interfaces";
+import { MessageType, MessageHandler, Request, Response, DeviceConfig, ConnectionState, VariableObserver } from "./interfaces";
 import { BehaviorSubject, Subject } from "rxjs";
+import { IotDevice } from "./device";
 
 export class Controller {
   ws: WebSocket;
@@ -18,10 +11,11 @@ export class Controller {
   private url: string;
 
   observables: Array<VariableObserver> = [];
+  devices: Subject<Array<IotDevice>> = new BehaviorSubject([]);
 
-  connectionState: Subject<ConnectionState> = new BehaviorSubject(
-    ConnectionState.DISCONNECTED
-  );
+  deviceList = Array<IotDevice>();
+
+  connectionState: Subject<ConnectionState> = new BehaviorSubject(ConnectionState.DISCONNECTED);
 
   onOpen: Function;
   onClose: Function;
@@ -54,11 +48,17 @@ export class Controller {
 
   private onOpenHandler() {
     if (this.onOpen !== null) {
-      this.getDevices(devices => {
-        console.log("devices", devices);
-        this.connectionState.next(ConnectionState.CONNECTED);
-      });
+      this.refreshDevices();
     }
+  }
+
+  private refreshDevices() {
+    this.getDevices((devices) => {
+      console.log("devices", devices);
+      this.deviceList = devices;
+      this.devices.next(this.deviceList);
+      this.connectionState.next(ConnectionState.CONNECTED);
+    });
   }
 
   private onCloseHandler(error) {
@@ -86,15 +86,11 @@ export class Controller {
       case MessageType.DeviceConnected:
         {
           const deviceConfig = message.args.device;
-          const observables = this.observables.filter(
-            observable => observable.deviceUuid === deviceConfig.deviceUuid
-          );
+          const observables = this.observables.filter((observable) => observable.deviceUuid === deviceConfig.deviceUuid);
 
           if (observables.length > 0) {
-            observables.map(observable => {
-              observable.observer.next(
-                deviceConfig.vars[observable.variableUuid].value
-              );
+            observables.map((observable) => {
+              observable.observer.next(deviceConfig.vars[observable.variableUuid].value);
             });
           }
         }
@@ -102,26 +98,25 @@ export class Controller {
       case MessageType.DeviceDisconnected:
         {
           const deviceUuid = message.args.id;
-          const observables = this.observables.filter(
-            observable => observable.deviceUuid === deviceUuid
-          );
+          const observables = this.observables.filter((observable) => observable.deviceUuid === deviceUuid);
 
           if (observables.length > 0) {
-            observables.map(observable => {
+            observables.map((observable) => {
               observable.observer.next(undefined);
             });
           }
         }
         break;
       case MessageType.ValueUpdated:
-        this.observables.forEach(observer => {
-          if (
-            observer.deviceUuid === message.args.deviceUuid &&
-            observer.variableUuid === message.args.variableUuid
-          ) {
+        this.observables.forEach((observer) => {
+          if (observer.deviceUuid === message.args.deviceUuid && observer.variableUuid === message.args.variableUuid) {
             observer.observer.next(message.args.value);
           }
         });
+        break;
+
+      case MessageType.DeviceListChanged:
+        this.devices.next(message.args.devices);
         break;
     }
   }
@@ -149,7 +144,7 @@ export class Controller {
 
   getDevices(callback) {
     const request: Request = {
-      type: MessageType.GetDevices
+      type: MessageType.GetDevices,
     };
     this.sendRequest(request, callback);
   }
@@ -159,8 +154,8 @@ export class Controller {
       const request: Request = {
         type: MessageType.GetDevice,
         args: {
-          deviceUuid
-        }
+          deviceUuid,
+        },
       };
       this.sendRequest(request, resolve);
     });
@@ -170,11 +165,11 @@ export class Controller {
     const request: Request = {
       type: MessageType.SetValue,
       reqId: 0,
-      args: { deviceUuid, variableUuid, value }
+      args: { deviceUuid, variableUuid, value },
     };
 
     console.log("setValue", deviceUuid, variableUuid, value);
-    this.sendRequest(request, response => {});
+    this.sendRequest(request, (response) => {});
   }
 
   observe(deviceUuid: string, variableUuid: string) {
