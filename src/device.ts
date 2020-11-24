@@ -78,12 +78,13 @@ export abstract class IotDevice {
     this.socket = null;
   }
 
-  updateValue(variable, value) {
-    this.deviceConfig.vars[variable].value = value;
+  updateValue(variableUuid, value) {
+    const deviceUuid = this.deviceConfig.deviceUuid;
+    this.deviceConfig.vars[variableUuid].value = value;
 
     const request: Request = {
       type: MessageType.ValueUpdated,
-      args: { variable, value },
+      args: { deviceUuid, variableUuid, value },
     };
     this.socket.send(JSON.stringify(request));
   }

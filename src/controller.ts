@@ -31,7 +31,7 @@ export class Controller {
     this.ws.onclose = this.onCloseHandler.bind(this);
     this.ws.onmessage = this.onMessageHandler.bind(this);
     this.ws.onopen = this.onOpenHandler.bind(this);
-    this.ws.onerror = error => console.log(error);
+    this.ws.onerror = (error) => console.log(error);
     this.url = url;
   }
 
@@ -178,11 +178,11 @@ export class Controller {
     const observer: VariableObserver = {
       variableUuid,
       deviceUuid,
-      observer: observable
+      observer: observable,
     };
-    this.getDevice(deviceUuid).then((response: any) => {
-      if (response.deviceConfig) {
-        observable.next(response.deviceConfig.vars[variableUuid].value);
+    this.getDevice(deviceUuid).then((deviceConfig: DeviceConfig) => {
+      if (deviceConfig) {
+        observable.next(deviceConfig.vars[variableUuid].value);
       } else {
         observable.next(undefined);
       }
@@ -194,10 +194,8 @@ export class Controller {
   }
 
   unsubscribe(observable) {
-    this.observables = this.observables.filter(
-      (variableObserver: VariableObserver) => {
-        return variableObserver.observer !== observable;
-      }
-    );
+    this.observables = this.observables.filter((variableObserver: VariableObserver) => {
+      return variableObserver.observer !== observable;
+    });
   }
 }
