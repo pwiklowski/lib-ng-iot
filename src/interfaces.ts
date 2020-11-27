@@ -63,7 +63,8 @@ export enum ConnectionState {
 
 export interface AuthData {
   client_id: string;
-  secret: string;
+  client_secret: string;
   access_token: string;
   refresh_token: string;
+  expires_in: number;
 }

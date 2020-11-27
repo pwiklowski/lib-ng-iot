@@ -9,7 +9,7 @@
     // "noUnusedLocals": true,
     //"strict": true,
     "outDir": "build",
-    "lib": ["es6", "es7", "dom"],
+    "lib": ["es6", "es7", "dom", "ES2017.Object"],
     "baseUrl": "src",
     "paths": {
       "src": ["./src/*"]
