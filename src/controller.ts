@@ -81,7 +81,6 @@ export class Controller {
   }
 
   private handleRequest(message: Request) {
-    console.log("handle message", message);
     switch (message.type) {
       case MessageType.DeviceConnected:
         {
