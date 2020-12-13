@@ -14,6 +14,8 @@ export class Controller {
   devices: Subject<Array<IotDevice>> = new BehaviorSubject([]);
 
   deviceList = Array<IotDevice>();
+  deviceConnected: Subject<DeviceConfig> = new Subject();
+  deviceDisconnected: Subject<string> = new Subject();
 
   connectionState: Subject<ConnectionState> = new BehaviorSubject(ConnectionState.DISCONNECTED);
 
@@ -92,6 +94,7 @@ export class Controller {
               observable.observer.next(deviceConfig.vars[observable.variableUuid].value);
             });
           }
+          this.deviceConnected.next(deviceConfig);
         }
         break;
       case MessageType.DeviceDisconnected:
@@ -104,6 +107,8 @@ export class Controller {
               observable.observer.next(undefined);
             });
           }
+
+          this.deviceDisconnected.next(deviceUuid);
         }
         break;
       case MessageType.ValueUpdated:
