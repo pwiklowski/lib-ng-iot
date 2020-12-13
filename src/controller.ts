@@ -11,11 +11,12 @@ export class Controller {
   private url: string;
 
   observables: Array<VariableObserver> = [];
-  devices: Subject<Array<IotDevice>> = new BehaviorSubject([]);
+  devices: Subject<Array<DeviceConfig>> = new BehaviorSubject([]);
 
-  deviceList = Array<IotDevice>();
   deviceConnected: Subject<DeviceConfig> = new Subject();
   deviceDisconnected: Subject<string> = new Subject();
+
+  deviceList = Array<DeviceConfig>();
 
   connectionState: Subject<ConnectionState> = new BehaviorSubject(ConnectionState.DISCONNECTED);
 
