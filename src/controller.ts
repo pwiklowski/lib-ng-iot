@@ -167,14 +167,22 @@ export class Controller {
   }
 
   setValue(deviceUuid, variableUuid, value) {
-    const request: Request = {
-      type: MessageType.SetValue,
-      reqId: 0,
-      args: { deviceUuid, variableUuid, value },
-    };
+    return new Promise((resolve, reject) => {
+      const request: Request = {
+        type: MessageType.SetValue,
+        reqId: 0,
+        args: { deviceUuid, variableUuid, value },
+      };
 
-    console.log("setValue", deviceUuid, variableUuid, value);
-    this.sendRequest(request, (response) => {});
+      console.log("setValue", deviceUuid, variableUuid, value);
+      this.sendRequest(request, (response) => {
+        if (response) {
+          resolve(response);
+        } else {
+          reject();
+        }
+      });
+    });
   }
 
   observe(deviceUuid: string, variableUuid: string) {
