@@ -1,6 +1,6 @@
 {
   "name": "@wiklosoft/ng-iot",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "scripts": {
