@@ -59,6 +59,8 @@ export class Controller {
       let isAlive = setTimeout(() => {
         console.warn("ping timout");
         this.ws.close();
+        this.connectionState.next(ConnectionState.DISCONNECTED);
+        clearInterval(this.pingInterval);
       }, 2000);
 
       this.sendRequest({ type: MessageType.Ping }, () => {
