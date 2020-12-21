@@ -2,7 +2,6 @@ import WebSocket from "isomorphic-ws";
 
 import { MessageType, MessageHandler, Request, Response, DeviceConfig, ConnectionState, VariableObserver } from "./interfaces";
 import { BehaviorSubject, Subject } from "rxjs";
-import { IotDevice } from "./device";
 
 export class Controller {
   ws: WebSocket;
@@ -71,7 +70,6 @@ export class Controller {
 
   private refreshDevices() {
     this.getDevices((devices) => {
-      console.log("devices", devices);
       this.deviceList = devices;
       this.devices.next(this.deviceList);
       this.connectionState.next(ConnectionState.CONNECTED);
@@ -189,7 +187,6 @@ export class Controller {
         args: { deviceUuid, variableUuid, value },
       };
 
-      console.log("setValue", deviceUuid, variableUuid, value);
       this.sendRequest(request, (response) => {
         if (response) {
           resolve(response);
