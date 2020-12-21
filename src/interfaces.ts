@@ -26,6 +26,7 @@ export enum MessageType {
   SetValue,
   GetDevice,
   DeviceListChanged,
+  Ping,
 }
 
 export interface DeviceConfig {

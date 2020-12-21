@@ -24,6 +24,8 @@ export class Controller {
   onClose: Function;
   onMessage: MessageHandler = null;
 
+  pingInterval;
+
   constructor() {
     this.callbacks = new Map();
   }
@@ -53,6 +55,16 @@ export class Controller {
     if (this.onOpen !== null) {
       this.refreshDevices();
     }
+    this.pingInterval = setInterval(() => {
+      let isAlive = setTimeout(() => {
+        console.warn("ping timout");
+        this.ws.close();
+      }, 2000);
+
+      this.sendRequest({ type: MessageType.Ping }, () => {
+        clearTimeout(isAlive);
+      });
+    }, 5000);
   }
 
   private refreshDevices() {
@@ -65,6 +77,7 @@ export class Controller {
   }
 
   private onCloseHandler(error) {
+    clearInterval(this.pingInterval);
     if (this.onClose !== null) {
       if (error.code === 4403) {
         this.connectionState.next(ConnectionState.NOT_AUTHORIZED);
