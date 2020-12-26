@@ -69,3 +69,12 @@ export interface AuthData {
   refresh_token: string;
   expires_in: number;
 }
+
+export interface Rule {
+  name: string;
+  id: string;
+  deviceUuid: string;
+  variableUuid: string;
+  username: string;
+  script: string;
+}
