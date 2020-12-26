@@ -14,6 +14,7 @@ export class Controller {
 
   deviceConnected: Subject<DeviceConfig> = new Subject();
   deviceDisconnected: Subject<string> = new Subject();
+  logs: Subject<string> = new Subject();
 
   deviceList = Array<DeviceConfig>();
 
@@ -135,6 +136,10 @@ export class Controller {
 
       case MessageType.DeviceListChanged:
         this.devices.next(message.args.devices);
+        break;
+
+      case MessageType.RuleLog:
+        this.logs.next(message.args);
         break;
     }
   }
