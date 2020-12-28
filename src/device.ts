@@ -49,7 +49,6 @@ export abstract class IotDevice {
 
   onMessage(data: string) {
     const req: Request = JSON.parse(data);
-    console.log(`message ${req} ms`, req.type);
 
     if (req.type === MessageType.SetValue) {
       this.deviceConfig.vars[req.args.variableUuid].value = req.args.value;
