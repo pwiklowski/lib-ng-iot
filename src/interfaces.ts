@@ -79,3 +79,17 @@ export interface Rule {
   username: string;
   script: string;
 }
+
+export interface Preset {
+  username?: string;
+  id?: string;
+  name: string;
+  uuid?: string;
+  variables: Array<VariablePreset>;
+}
+
+export interface VariablePreset {
+  deviceUuid: string;
+  variableUuid: string;
+  value: object;
+}
