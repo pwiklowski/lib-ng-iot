@@ -31,6 +31,7 @@ export enum MessageType {
 }
 
 export interface DeviceConfig {
+  isConnected?: boolean;
   name: string;
   deviceUuid: string;
   vars: Vars;
@@ -73,10 +74,10 @@ export interface AuthData {
 
 export interface Rule {
   name: string;
-  id: string;
+  id?: string;
   deviceUuid: string;
   variableUuid: string;
-  username: string;
+  username?: string;
   script: string;
 }
 
