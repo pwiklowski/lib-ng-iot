@@ -193,7 +193,7 @@ export class Controller {
       };
 
       this.sendRequest(request, (response) => {
-        if (response) {
+        if (response !== null) {
           resolve(response);
         } else {
           reject();
