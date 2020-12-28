@@ -20,12 +20,19 @@ export abstract class IotDevice {
   async start() {
     await this.readAuthData();
     try {
-      await this.refreshToken();
+      if (this.isRefeshTokenNeeded()) {
+        await this.refreshToken();
+      }
       this.open();
     } catch (e) {
-      console.error("error staring device", e);
+      console.error("error staring device", e.message);
       await this.login();
     }
+  }
+
+  isRefeshTokenNeeded() {
+    console.log("isRefeshTokenNeeded", this.auth.expires_in < Date.now() / 1000);
+    return this.auth.expires_in < Date.now() / 1000;
   }
 
   open() {
