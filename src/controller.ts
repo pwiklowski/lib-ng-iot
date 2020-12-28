@@ -193,10 +193,10 @@ export class Controller {
       };
 
       this.sendRequest(request, (response) => {
-        if (response !== null) {
-          resolve(response);
+        if (response.error !== undefined) {
+          reject(response.error);
         } else {
-          reject();
+          resolve(response.value);
         }
       });
     });
