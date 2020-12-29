@@ -81,7 +81,7 @@ export abstract class IotDevice {
   onClose = () => {
     setTimeout(() => {
       this.open();
-    }, 1000);
+    }, 10000);
   };
 
   stop() {
