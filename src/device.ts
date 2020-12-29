@@ -36,7 +36,7 @@ export abstract class IotDevice {
   }
 
   open() {
-    this.socket = new websocket(`${this.serverUrl}?token=${this.auth.access_token}`);
+    this.socket = new websocket(`${this.serverUrl}?token=${this.auth.id_token}`);
     this.socket.on("open", this.onOpen.bind(this));
     this.socket.on("close", this.onClose.bind(this));
     this.socket.on("message", this.onMessage.bind(this));
@@ -139,7 +139,7 @@ export abstract class IotDevice {
       headers: { "content-type": "application/x-www-form-urlencoded" },
       data: this.getQueryString({
         client_id: this.auth.client_id,
-        scope: "profile openid offline_access",
+        scope: "name email profile openid offline_access",
         audience: "https://wiklosoft.eu.auth0.com/api/v2/",
       }),
     });
@@ -171,6 +171,7 @@ export abstract class IotDevice {
       this.auth.refresh_token = response.data.refresh_token;
     }
     this.auth.expires_in = Math.floor(Date.now() / 1000) + response.data.expires_in;
+    this.auth.id_token = response.data.id_token;
 
     this.saveAuthData(this.auth);
   }
