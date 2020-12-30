@@ -1,14 +1,9 @@
-import WebSocket from "isomorphic-ws";
+import { Client } from "./client";
 
-import { MessageType, MessageHandler, Request, Response, DeviceConfig, ConnectionState, VariableObserver } from "./interfaces";
+import { MessageType, MessageHandler, Request, DeviceConfig, ConnectionState, VariableObserver } from "./interfaces";
 import { BehaviorSubject, Subject } from "rxjs";
 
-export class Controller {
-  ws: WebSocket;
-  callbacks: Map<number, Function>;
-  reqId = 0;
-  private url: string;
-
+export class Controller extends Client {
   observables: Array<VariableObserver> = [];
   devices: Subject<Array<DeviceConfig>> = new BehaviorSubject([]);
 
@@ -27,7 +22,7 @@ export class Controller {
   pingInterval;
 
   constructor() {
-    this.callbacks = new Map();
+    super();
   }
 
   connect(url: string, callback: Function) {
@@ -37,11 +32,11 @@ export class Controller {
     this.ws.onmessage = this.onMessageHandler.bind(this);
     this.ws.onopen = this.onOpenHandler.bind(this);
     this.ws.onerror = (error) => console.log(error);
-    this.url = url;
+    this.serverUrl = url;
   }
 
   reconnect() {
-    this.ws = new WebSocket(this.url);
+    this.ws = new WebSocket(this.serverUrl);
     this.ws.onclose = this.onCloseHandler.bind(this);
     this.ws.onmessage = this.onMessageHandler.bind(this);
     this.ws.onopen = this.onOpenHandler.bind(this);
@@ -88,16 +83,7 @@ export class Controller {
     }
   }
 
-  private onMessageHandler(message) {
-    const msg = JSON.parse(message.data);
-    if (msg.resId !== undefined) {
-      this.handleResponse(msg);
-    } else {
-      this.handleRequest(msg);
-    }
-  }
-
-  private handleRequest(message: Request) {
+  handleRequest(message: Request) {
     switch (message.type) {
       case MessageType.DeviceConnected:
         {
@@ -142,27 +128,6 @@ export class Controller {
         this.logs.next(message.args);
         break;
     }
-  }
-
-  private handleResponse(msg: Response) {
-    const callback = this.callbacks.get(msg.resId);
-    if (callback) {
-      callback(msg.res);
-      this.callbacks.delete(msg.resId);
-    }
-  }
-
-  sendRequest(req: Request, callback?: Function) {
-    if (callback !== undefined) {
-      req.reqId = this.reqId++;
-      this.callbacks.set(req.reqId, callback);
-    }
-    this.ws.send(JSON.stringify(req));
-  }
-
-  sendResponse(req: Request, res: Response) {
-    res.resId = req.reqId;
-    this.ws.send(JSON.stringify(res));
   }
 
   getDevices(callback) {

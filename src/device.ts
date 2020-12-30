@@ -1,15 +1,16 @@
-import websocket from "isomorphic-ws";
 import axios from "axios";
+import { Client } from "./client";
+import WebSocket from "isomorphic-ws";
 
 import { MessageType, Request, DeviceConfig, AuthData } from "./interfaces";
 
-export abstract class IotDevice {
-  socket = null;
+export abstract class IotDevice extends Client {
   deviceConfig: DeviceConfig;
-  serverUrl: string;
   auth: AuthData;
 
-  constructor(serverUrl: string, deviceConfig: DeviceConfig) {
+  constructor(serverUrl: string, deviceConfig: DeviceConfig, auth: AuthData) {
+    super();
+    this.auth = auth;
     this.serverUrl = serverUrl;
     this.deviceConfig = deviceConfig;
   }
@@ -17,16 +18,21 @@ export abstract class IotDevice {
   abstract async readAuthData();
   abstract async saveAuthData(data: AuthData);
 
+  getAuthConfigFilename() {
+    return this.deviceConfig.deviceUuid + ".json";
+  }
+
   async start() {
-    await this.readAuthData();
     try {
+      await this.readAuthData();
       if (this.isRefeshTokenNeeded()) {
         await this.refreshToken();
       }
-      this.open();
+      await this.open();
     } catch (e) {
       console.error("error staring device", e.message);
       await this.login();
+      await this.open();
     }
   }
 
@@ -35,31 +41,28 @@ export abstract class IotDevice {
     return this.auth.expires_in < Date.now() / 1000;
   }
 
-  open() {
-    this.socket = new websocket(`${this.serverUrl}?token=${this.auth.id_token}`);
-    this.socket.on("open", this.onOpen.bind(this));
-    this.socket.on("close", this.onClose.bind(this));
-    this.socket.on("message", this.onMessage.bind(this));
-    this.socket.on("error", this.onError.bind(this));
-  }
+  async open() {
+    this.ws = new WebSocket(`${this.serverUrl}?token=${this.auth.id_token}`);
+    this.ws.onclose = this.onClose.bind(this);
+    this.ws.onmessage = this.onMessageHandler.bind(this);
 
-  onOpen() {
-    console.log("connected");
-    const request: Request = {
-      type: MessageType.Hello,
-      reqId: 0,
-      args: { config: this.deviceConfig },
+    this.ws.onopen = () => {
+      console.log("connected");
+      const request: Request = {
+        type: MessageType.Hello,
+        reqId: 0,
+        args: { config: this.deviceConfig },
+      };
+
+      this.sendRequest(request, null);
     };
-
-    this.socket.send(JSON.stringify(request));
   }
 
-  onMessage(data: string) {
-    const req: Request = JSON.parse(data);
-
+  handleRequest(req: Request) {
     if (req.type === MessageType.SetValue) {
       this.deviceConfig.vars[req.args.variableUuid].value = req.args.value;
 
+      console.log("set value ", req.args.value);
       const valueUpdatedRequest: Request = {
         type: MessageType.ValueUpdated,
         args: {
@@ -67,26 +70,33 @@ export abstract class IotDevice {
           value: this.deviceConfig.vars[req.args.variableUuid].value,
         },
       };
-      this.socket.send(JSON.stringify(valueUpdatedRequest));
+      this.sendRequest(valueUpdatedRequest);
     }
   }
 
-  onError(error) {
-    console.log(error);
-    if (error.code === "ECONNRESET") {
-      this.refreshToken();
+  async onClose(closeCode) {
+    console.log("on close", closeCode.code);
+    if (closeCode.code === 4403) {
+      try {
+        await this.refreshToken();
+        await this.open();
+      } catch (e) {
+        console.error(e.message, e.response.data, e.response.status);
+        if (e.response.status === 403) {
+          await this.login();
+          await this.open();
+        }
+      }
+    } else {
+      setTimeout(() => {
+        this.open();
+      }, 10000);
     }
   }
-
-  onClose = () => {
-    setTimeout(() => {
-      this.open();
-    }, 10000);
-  };
 
   stop() {
-    this.socket.close();
-    this.socket = null;
+    this.ws.close();
+    this.ws = null;
   }
 
   updateValue(variableUuid, value) {
@@ -97,7 +107,7 @@ export abstract class IotDevice {
       type: MessageType.ValueUpdated,
       args: { deviceUuid, variableUuid, value },
     };
-    this.socket.send(JSON.stringify(request));
+    this.ws.send(JSON.stringify(request));
   }
 
   getQueryString(data = {}) {
