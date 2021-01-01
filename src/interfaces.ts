@@ -95,3 +95,10 @@ export interface VariablePreset {
   variableUuid: string;
   value: object;
 }
+
+export interface Alias {
+  username?: string;
+  id?: string;
+  name: string;
+  deviceUuid?: string;
+}
