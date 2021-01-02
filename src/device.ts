@@ -44,6 +44,7 @@ export abstract class IotDevice extends Client {
   async open() {
     this.ws = new WebSocket(`${this.serverUrl}?token=${this.auth.id_token}`);
     this.ws.onclose = this.onClose.bind(this);
+    this.ws.onerror = this.onError.bind(this);
     this.ws.onmessage = this.onMessageHandler.bind(this);
 
     this.ws.onopen = () => {
@@ -93,6 +94,8 @@ export abstract class IotDevice extends Client {
       }, 10000);
     }
   }
+
+  onError(error) {}
 
   stop() {
     this.ws.close();
