@@ -4,6 +4,9 @@ import WebSocket from "isomorphic-ws";
 
 import { MessageType, Request, DeviceConfig, AuthData } from "./interfaces";
 
+const TOKEN_REFRESH_INTERVAL = 12 * 60 * 60 * 1000;
+const TOKEN_REFRESH_FAILED_INTERVAL = 60 * 1000;
+
 export abstract class IotDevice extends Client {
   deviceConfig: DeviceConfig;
   auth: AuthData;
@@ -25,14 +28,24 @@ export abstract class IotDevice extends Client {
   async start() {
     try {
       await this.readAuthData();
-      if (this.isRefeshTokenNeeded()) {
-        await this.refreshToken();
-      }
+      await this.refreshToken();
       await this.open();
+      setTimeout(this.tryRefreshToken.bind(this), TOKEN_REFRESH_INTERVAL);
     } catch (e) {
       console.error("error staring device", e.message);
       await this.login();
       await this.open();
+    }
+  }
+
+  async tryRefreshToken() {
+    try {
+      await this.refreshToken();
+      setTimeout(this.tryRefreshToken.bind(this), TOKEN_REFRESH_INTERVAL);
+      console.log("token refreshed succesfuly");
+    } catch (e) {
+      console.log(e);
+      setTimeout(this.tryRefreshToken.bind(this), TOKEN_REFRESH_FAILED_INTERVAL);
     }
   }
 
@@ -133,7 +146,6 @@ export abstract class IotDevice extends Client {
               client_id: this.auth.client_id,
             }),
           });
-          console.log(response.data);
           if (response.data.access_token) {
             clearInterval(timer);
             resolve(response);
