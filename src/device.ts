@@ -89,7 +89,7 @@ export abstract class IotDevice extends Client {
   }
 
   async onClose(closeCode) {
-    console.log("on close", closeCode.code);
+    console.log("on close", this.deviceConfig.deviceUuid, closeCode.code);
     if (closeCode.code === 4403) {
       try {
         await this.refreshToken();
@@ -108,7 +108,9 @@ export abstract class IotDevice extends Client {
     }
   }
 
-  onError(error) {}
+  onError(error) {
+    console.error("onError", this.deviceConfig.deviceUuid, error);
+  }
 
   stop() {
     this.ws.close();
@@ -168,7 +170,7 @@ export abstract class IotDevice extends Client {
         audience: "https://wiklosoft.eu.auth0.com/api/v2/",
       }),
     });
-    console.log(response.data);
+    console.log(JSON.stringify(response.data.verification_uri_complete));
     const authResponse = await this.checkResponse(response.data.device_code, response.data.interval);
     this.handleAuthResponse(authResponse);
   }
