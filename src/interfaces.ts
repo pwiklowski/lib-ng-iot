@@ -34,6 +34,7 @@ export interface DeviceConfig {
   isConnected?: boolean;
   name: string;
   deviceUuid: string;
+  version: string;
   vars: Vars;
 }
 
