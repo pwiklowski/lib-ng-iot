@@ -2,7 +2,7 @@ import axios from "axios";
 import { Client } from "./client";
 import WebSocket from "isomorphic-ws";
 
-import { MessageType, Request, DeviceConfig, AuthData } from "./interfaces";
+import { MessageType, Request, Response, DeviceConfig, AuthData } from "./interfaces";
 
 const TOKEN_REFRESH_INTERVAL = 12 * 60 * 60 * 1000;
 const TOKEN_REFRESH_FAILED_INTERVAL = 60 * 1000;
@@ -61,14 +61,7 @@ export abstract class IotDevice extends Client {
     this.ws.onmessage = this.onMessageHandler.bind(this);
 
     this.ws.onopen = () => {
-      console.log("connected");
-      const request: Request = {
-        type: MessageType.Hello,
-        reqId: 0,
-        args: { config: this.deviceConfig },
-      };
-
-      this.sendRequest(request, null);
+      console.log("connected", this.deviceConfig.deviceUuid);
     };
   }
 
@@ -85,6 +78,12 @@ export abstract class IotDevice extends Client {
         },
       };
       this.sendRequest(valueUpdatedRequest);
+    } else if (req.type === MessageType.Hello) {
+      const response: Response = {
+        res: { config: this.deviceConfig },
+      };
+
+      this.sendResponse(req, response);
     }
   }
 
